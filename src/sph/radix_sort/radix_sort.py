@@ -19,6 +19,8 @@ class RadixSort(object):
         
         self.dtype_size = np.nbytes[dtype]
 
+        __file__ = r'C:\Users\Daniel\informatika\petnica\2012\simulacija fluida\pysph\src\sph\radix_sort\radix_sort.py'
+        
         cur_dir = os.path.dirname(os.path.abspath(__file__))
         with open('%s/Scan_b.cl' % cur_dir) as f:
             self.scan_prg = cl.Program(self.ctx, f.read()).build()
@@ -32,10 +34,12 @@ class RadixSort(object):
 
         self.d_temp_keys = cl.Buffer(self.ctx, mf.READ_WRITE, size=self.dtype_size * max_elements)
         self.d_temp_values = cl.Buffer(self.ctx, mf.READ_WRITE, size=self.dtype_size * max_elements)
+        
+        #print(self.dtype_size * self.WARP_SIZE * num_blocks, type(self.dtype_size * self.WARP_SIZE * num_blocks))
 
-        self.d_counters = cl.Buffer(self.ctx, mf.READ_WRITE, size=self.dtype_size * self.WARP_SIZE * num_blocks)
-        self.d_counters_sum = cl.Buffer(self.ctx, mf.READ_WRITE, size=self.dtype_size * self.WARP_SIZE * num_blocks)
-        self.d_block_offsets = cl.Buffer(self.ctx, mf.READ_WRITE, size=self.dtype_size * self.WARP_SIZE * num_blocks)
+        self.d_counters = cl.Buffer(self.ctx, mf.READ_WRITE, size=int(self.dtype_size * self.WARP_SIZE * num_blocks))
+        self.d_counters_sum = cl.Buffer(self.ctx, mf.READ_WRITE, size=int(self.dtype_size * self.WARP_SIZE * num_blocks))
+        self.d_block_offsets = cl.Buffer(self.ctx, mf.READ_WRITE, size=int(self.dtype_size * self.WARP_SIZE * num_blocks))
 
         numscan = max_elements/2/cta_size*16
         if numscan >= self.MIN_LARGE_ARRAY_SIZE:
@@ -70,7 +74,7 @@ class RadixSort(object):
 
     def blocks(self, d_key, d_val, nbits, startbit, num):
         totalBlocks = num/4/self.cta_size
-        global_size = (self.cta_size*totalBlocks,)
+        global_size = (int(self.cta_size*totalBlocks),)
         local_size = (self.cta_size,)
         blocks_args = (d_key,
                        d_val,
@@ -83,12 +87,13 @@ class RadixSort(object):
                        cl.LocalMemory(4*self.cta_size*self.dtype_size),
                        cl.LocalMemory(4*self.cta_size*self.dtype_size),
             )
+        #print(global_size)
         self.radix_prg.radixSortBlocksKeysValues(self.queue, global_size, local_size, *blocks_args)
 
 
     def find_offsets(self, startbit, num):
         totalBlocks = num/2/self.cta_size
-        global_size = (self.cta_size*totalBlocks,)
+        global_size = (int(self.cta_size*totalBlocks),)
         local_size = (self.cta_size,)
         offsets_args = (self.d_temp_keys,
                         self.d_temp_values,
@@ -103,16 +108,17 @@ class RadixSort(object):
 
 
     def naive_scan(self, num):
-        nhist = num/2/self.cta_size*16
+        nhist = int(num/2/self.cta_size*16)
         global_size = (nhist,)
         local_size = (nhist,)
         extra_space = nhist / 16 #NUM_BANKS defined as 16 in RadixSort.cpp
-        shared_mem_size = self.dtype_size * (nhist + extra_space)
+        shared_mem_size = int(self.dtype_size * (nhist + extra_space))
         scan_args = (self.d_counters_sum,
                      self.d_counters,
                      np.uint32(nhist),
                      cl.LocalMemory(2*shared_mem_size)
             )
+        #print(self.queue, global_size, local_size, *scan_args)
         self.radix_prg.scanNaive(self.queue, global_size, local_size, *scan_args)
 
 
@@ -170,8 +176,8 @@ class RadixSort(object):
         self.scan_prg.uniformUpdate(self.queue, global_size, local_size, *scan_args)
 
     def reorder(self, d_key, d_val, startbit, num):
-        totalBlocks = num/2/self.cta_size
-        global_size = (self.cta_size*totalBlocks,)
+        totalBlocks = int(num/2/self.cta_size)
+        global_size = (int(self.cta_size*totalBlocks),)
         local_size = (self.cta_size,)
         reorder_args = (d_key,
                         d_val,
@@ -209,11 +215,11 @@ if __name__ == '__main__':
     from time import time
     t = time()
     s.sort(d_keys, d_vals, N)
-    print "%is" % ((time()-t)*1000)
+    print("%is" % ((time()-t)*1000))
 
     cl.enqueue_copy(queue, keys, d_keys)
     cl.enqueue_copy(queue, vals, d_vals)
     queue.finish()
     
-    print np.linalg.norm(keys-sorted_keys)
-    print np.linalg.norm(vals-sorted_vals)
+    print(np.linalg.norm(keys-sorted_keys))
+    print(np.linalg.norm(vals-sorted_vals))

@@ -2,7 +2,7 @@ from cg import CGDefaultShader
 import os
 
 class BlurShader(CGDefaultShader):
-    VERTICAL, HORIZONTAL = range(2)
+    VERTICAL, HORIZONTAL = list(range(2))
 
     def __init__(self, size=(800,800), radius=10, sigma=3):
         self.width, self.height = size
@@ -14,7 +14,9 @@ class BlurShader(CGDefaultShader):
                 sigma=sigma,
                 radius=radius,
                 ))
-
+        #print('trying to compile blur.cg. source: ')
+        #source = open('%s/blur2.cg' % cur_dir).read().strip()
+        print(source)
         super(BlurShader, self).__init__(source, entry_vertex="passVertex", entry_fragment="blurFragment")
 
         self.direction = BlurShader.HORIZONTAL

@@ -1,4 +1,4 @@
-#pysph 
+#pysph - python3
 
 ![pysph screenshot](https://github.com/benma/pysph/raw/master/screenshots/concat.png)
 

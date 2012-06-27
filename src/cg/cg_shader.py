@@ -4,10 +4,10 @@ Quick and easy wrappers to create vertex/fragment shaders.
 import sys
 from ctypes import *
 
-from cg import *
-from cg_gl import *
+from .cg import *
+from .cg_gl import *
 
-from platform import cg_platform as cg, cg_gl_platform as cg_gl
+from .platform import cg_platform as cg, cg_gl_platform as cg_gl
 
 cg_gl.cgGLSetDebugMode(CG_FALSE)
 cg.cgCreateProgram.restype = CGprogram
@@ -61,7 +61,7 @@ def create_profile(shader_type):
         # this will never return glsl
         profile = cg_gl.cgGLGetLatestProfile(shader_type)
     
-    print "profile: ", cg.cgGetProfileString(profile)
+    print("profile: ", cg.cgGetProfileString(profile))
     cg_gl.cgGLSetOptimalOptions(profile)
     check_for_cg_error(context, "selecting profile")
 
