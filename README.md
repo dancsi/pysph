@@ -50,7 +50,7 @@ $ source bin/activate
 $ python /path/to/pysph/main.py
 ```
 
-**On Windows**
+**On Windows:**
 decorator, distribute, mako, numpy, pyOpenGL, pyOpenCL, pysideuic, pyside, pytools.
 Yuo can get all of them at http://www.lfd.uci.edu/~gohlke/pythonlibs/ 
 
