@@ -51,8 +51,8 @@ $ python /path/to/pysph/main.py
 ```
 
 **On Windows**
-* [pyopencl build instructions](http://wiki.tiker.net/PyOpenCL/Installation/Windows).
-* [PySide](http://qt-project.org/wiki/PySide_Binaries_Windows)
+decorator, distribute, mako, numpy, pyOpenGL, pyOpenCL, pysideuic, pyside, pytools.
+Yuo can get all of them at http://www.lfd.uci.edu/~gohlke/pythonlibs/ 
 
 ## Limitations
 
