@@ -3,6 +3,7 @@ Quick and easy wrappers to create vertex/fragment shaders.
 """
 import sys
 from ctypes import *
+from pprint import pprint
 
 from .cg import *
 from .cg_gl import *
@@ -97,18 +98,20 @@ class _CGShader(object):
         self.entry = entry or self.default_entry
         self.context = _create_context()
         self.profile = create_profile(CG_GL_VERTEX if self.vertex else CG_GL_FRAGMENT)
-
+        if type(entry) is str:
+            entry=bytes(entry, 'ascii')
+        if type(code) is str:
+            code=bytes(code, 'ascii')
         program = cg.cgCreateProgram(
             self.context, # Cg runtime context
             CG_SOURCE, # Program in human-readable form
-            code, # string of source code
+            c_char_p(code), # string of source code
             self.profile, # Profile: OpenGL ARB vertex program
-            entry,  # Entry function name
+            c_char_p(entry),  # Entry function name
             None # No extra compiler options
             )
-        
         self.error_prefix = '%s shader, entry = %s' % ("vertex" if self.vertex else "fragment", entry)
-
+        
         self.check_error("creating program from string")
         cg_gl.cgGLLoadProgram(program)
         self.check_error("loading program")
@@ -166,6 +169,7 @@ class CGVertexFragmentShader(object):
         self.vertex_profile = vertex_shader.profile
         self.fragment_profile = fragment_shader.profile
         self.program = cg.cgCombinePrograms2(vertex_shader.program, fragment_shader.program)
+        print('combining {0} and {1} -> got {2}'.format(type(vertex_shader.program), type(fragment_shader.program), type(self.program)))
         check_for_cg_error(self.context, "combine programs")
         cg.cgDestroyProgram(vertex_shader.program)
         cg.cgDestroyProgram(fragment_shader.program)
@@ -176,6 +180,9 @@ class CGVertexFragmentShader(object):
         check_for_cg_error(self.context, msg)
 
     def bind(self):
+        #print("binding program string:\n"+str(c_char_p(cg.cgGetProgramString(self.program,CG_PROGRAM_PROFILE)).value))
+        print("binding combined")
+        pprint(vars(self))
         cg_gl.cgGLBindProgram(self.program)
         self.check_error("binding program")
         cg_gl.cgGLEnableProfile(self.vertex_profile)

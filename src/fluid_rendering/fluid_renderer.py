@@ -17,11 +17,11 @@ class FluidShader(CGDefaultShader):
         cur_dir = os.path.dirname(os.path.abspath(__file__))
         with open('%s/shader.cg' % cur_dir) as f:
             from mako.template import Template
-            source = str(Template(f.read()).render(
+            source = bytes(str(Template(f.read()).render(
                 boxsize=boxsize,
                 radius=radius,
                 window_size=window_size,
-                ))
+                )), 'ascii')
         super(FluidShader, self).__init__(source, entry_vertex, entry_fragment)
 
         # with combined cg programs, one cannot have the same parameter in the vertex and in the fragment shader :(
@@ -76,11 +76,11 @@ class FluidRenderer(object):
         # so that it looks good from any distance.
         self.thickness_blur_shader = BlurShader(size=window_size, radius=20, sigma=5)
         
-        self.ball_shader = FluidShader(window_size, fluid_simulator.boxsize, radius, entry_fragment="ballFragment")
-        self.depth_shader = FluidShader(window_size, fluid_simulator.boxsize, radius*1.5, entry_fragment="depthFragment")
-        self.final_shader = FluidShader(window_size, fluid_simulator.boxsize, radius, entry_vertex="vertexPass", entry_fragment="finalFragment")
-        self.tex_shader = FluidShader(window_size, fluid_simulator.boxsize, radius, entry_vertex="vertexPass", entry_fragment="texFragment")
-        self.thickness_shader = FluidShader(window_size, fluid_simulator.boxsize, radius*3, entry_fragment="thicknessFragment")
+        self.ball_shader = FluidShader(window_size, fluid_simulator.boxsize, radius, entry_fragment=b"ballFragment")
+        self.depth_shader = FluidShader(window_size, fluid_simulator.boxsize, radius*1.5, entry_fragment=b"depthFragment")
+        self.final_shader = FluidShader(window_size, fluid_simulator.boxsize, radius, entry_vertex=b"vertexPass", entry_fragment=b"finalFragment")
+        self.tex_shader = FluidShader(window_size, fluid_simulator.boxsize, radius, entry_vertex=b"vertexPass", entry_fragment=b"texFragment")
+        self.thickness_shader = FluidShader(window_size, fluid_simulator.boxsize, radius*3, entry_fragment=b"thicknessFragment")
 
         from render_target import RenderTarget, RenderTargetR32F
         

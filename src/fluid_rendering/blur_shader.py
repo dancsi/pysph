@@ -10,15 +10,15 @@ class BlurShader(CGDefaultShader):
         cur_dir = os.path.dirname(os.path.abspath(__file__))
         with open('%s/blur.cg' % cur_dir) as f:
             from mako.template import Template
-            source = str(Template(f.read()).render(
+            source = bytes(str(Template(f.read()).render(
                 sigma=sigma,
                 radius=radius,
-                ))
-        #print('trying to compile blur.cg. source: ')
-        #source = open('%s/blur2.cg' % cur_dir).read().strip()
-        print(source)
-        super(BlurShader, self).__init__(source, entry_vertex="passVertex", entry_fragment="blurFragment")
-
+                )), 'ascii')
+        # print('trying to compile blur.cg. source: ')
+        # source = open('%s/blur2.cg' % cur_dir).read().strip()
+        # print(source)
+        super(BlurShader, self).__init__(source, entry_vertex=b"passVertex", entry_fragment=b"blurFragment")
+        
         self.direction = BlurShader.HORIZONTAL
         self.sigma = sigma
 
